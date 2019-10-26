@@ -124,6 +124,16 @@ public class ObjectDetectionAutonomous extends LinearOpMode {
 
                 frontLeft.setPower(0.01);
                 frontRight.setPower(0.01);
+
+                while (opModeIsActive() && frontLeft.isBusy() && frontRight.isBusy()) {
+                    telemetry.addData("encoder-fwd", frontLeft.getCurrentPosition() + "  busy=" + frontLeft.isBusy());
+                    telemetry.addData("encoder-fwd", frontRight.getCurrentPosition() + "  busy=" + frontRight.isBusy());
+                    telemetry.update();
+                    idle();
+                }
+
+                frontLeft.setPower(0.01);
+                frontRight.setPower(0.01);
             }
         }
 
