@@ -86,7 +86,7 @@ public class ObjectDetectionAutonomous extends LinearOpMode {
         frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        // set right motor to reverse and run to target encoder position and stop with brakes on.
+        // set right motor to reverse and run to target encoder position and stop with brakes on
         frontRight.setDirection(DcMotor.Direction.REVERSE);
         frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -109,7 +109,7 @@ public class ObjectDetectionAutonomous extends LinearOpMode {
         waitForStart();
 
 
-        int increment = 0;
+        int targetPosition = 0;
         while(opModeIsActive()) {
             if (tfod != null) {
                 if (isSkystoneDetected()) {
@@ -117,23 +117,31 @@ public class ObjectDetectionAutonomous extends LinearOpMode {
                     break;
                 }
 
-                increment = 2;
+                targetPosition += 100;
 
-                frontLeft.setTargetPosition(increment);
-                frontRight.setTargetPosition(increment);
+                frontLeft.setTargetPosition(targetPosition);
+                frontRight.setTargetPosition(-targetPosition);
 
-                frontLeft.setPower(0.01);
-                frontRight.setPower(0.01);
+                frontLeft.setPower(0.3);
+                frontRight.setPower(-0.1);
 
-                while (opModeIsActive() && frontLeft.isBusy() && frontRight.isBusy()) {
-                    telemetry.addData("encoder-fwd", frontLeft.getCurrentPosition() + "  busy=" + frontLeft.isBusy());
-                    telemetry.addData("encoder-fwd", frontRight.getCurrentPosition() + "  busy=" + frontRight.isBusy());
+                while (frontLeft.getCurrentPosition() < targetPosition && frontRight.getCurrentPosition() > -targetPosition) {
+                    telemetry.addData("Encoder-Left: ", frontLeft.getCurrentPosition() + "  < " + targetPosition);
+                    telemetry.addData("Encoder-Right: ", frontRight.getCurrentPosition() + "  > " + (-1 * targetPosition));
                     telemetry.update();
                     idle();
                 }
 
-                frontLeft.setPower(0.01);
-                frontRight.setPower(0.01);
+                frontLeft.setPower(0);
+                frontRight.setPower(0);
+
+                telemetry.addData("Current Position - Left: ", frontLeft.getCurrentPosition() + " Right: " + frontRight.getCurrentPosition());
+
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException ex) {
+                    telemetry.addLine("Sleep was interrupted");
+                }
             }
         }
 
@@ -165,6 +173,10 @@ public class ObjectDetectionAutonomous extends LinearOpMode {
     }
 
     private void stepsAfterDetection() {
+
+
+
+
         gyroEncoderTurn(start_heading - 90);
 //        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 //        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
