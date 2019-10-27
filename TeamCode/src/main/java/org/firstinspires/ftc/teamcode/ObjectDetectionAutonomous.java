@@ -10,6 +10,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
@@ -27,7 +28,7 @@ public class ObjectDetectionAutonomous extends LinearOpMode {
     private DcMotor spool = null;       // Motor to control the up/down spool
     private DcMotor frontLeft = null;   // Motors to control the drive train
     private DcMotor frontRight = null;
-    private DcMotor leftRight = null;   // Motor to control the horizontal motion
+    private DcMotor claw = null;   // Motor to control the horizontal motion
 
     BNO055IMU imu;
     Orientation angles;
@@ -75,13 +76,14 @@ public class ObjectDetectionAutonomous extends LinearOpMode {
         frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
         frontRight = hardwareMap.get(DcMotor.class, "frontRight");
         spool = hardwareMap.get(DcMotor.class, "spool");
-        leftRight = hardwareMap.get(DcMotor.class, "leftRight");
+        claw = hardwareMap.get(DcMotor.class, "claw");
 
         // reset encoder count kept by left motor.
         frontLeft.setTargetPosition(0);
         frontRight.setTargetPosition(0);
 
         // set left motor to run to target encoder position and stop with brakes on.
+        frontLeft.setDirection(DcMotor.Direction.FORWARD);
         frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -108,46 +110,42 @@ public class ObjectDetectionAutonomous extends LinearOpMode {
         telemetry.update();
         waitForStart();
 
+//        if (isSkystoneDetected()) {
+//            stepsAfterDetection();
+//            break;
+//        }
 
-        int targetPosition = 0;
-        while(opModeIsActive()) {
-            if (tfod != null) {
-                if (isSkystoneDetected()) {
-                    stepsAfterDetection();
-                    break;
-                }
+        int increment = 200;
+        int targetPositionLeft = frontLeft.getCurrentPosition() + increment;
+        int targetPositionRight = frontRight.getCurrentPosition() + increment;
 
-                targetPosition += 100;
+        frontLeft.setTargetPosition(targetPositionLeft);
+        frontRight.setTargetPosition(targetPositionRight);
 
-                frontLeft.setTargetPosition(targetPosition);
-                frontRight.setTargetPosition(-targetPosition);
+        frontLeft.setPower(0.1);
+        frontRight.setPower(0.1);
 
-                frontLeft.setPower(0.3);
-                frontRight.setPower(-0.1);
 
-                while (frontLeft.isBusy() && frontRight.isBusy()) {
-                    telemetry.addData("Encoder-Left: ", frontLeft.getCurrentPosition() + "  < " + targetPosition);
-                    telemetry.addData("Encoder-Right: ", frontRight.getCurrentPosition() + "  > " + (-1 * targetPosition));
-                    telemetry.update();
-                    idle();
-                }
-
-                frontLeft.setPower(0);
-                frontRight.setPower(0);
-
-                telemetry.addData("Current Position - Left: ", frontLeft.getCurrentPosition() + " Right: " + frontRight.getCurrentPosition());
-
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException ex) {
-                    telemetry.addLine("Sleep was interrupted");
-                }
-            }
+        while (frontLeft.getCurrentPosition() > (-1 * increment) && frontRight.getCurrentPosition() > (-1 * increment)) {
+            telemetry.addData("Encoder-Left: ", frontLeft.getCurrentPosition() + "  < " + targetPositionLeft);
+            telemetry.addData("Encoder-Right: ", frontRight.getCurrentPosition() + "  < " + targetPositionRight);
+            telemetry.update();
+            idle();
         }
 
-        if (tfod != null) {
-            tfod.shutdown();
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+
+        telemetry.addData("Current Position - Left: ", frontLeft.getCurrentPosition() + " Right: " + frontRight.getCurrentPosition());
+        telemetry.update();
+
+        try {
+            Thread.sleep(20000);
+        } catch (InterruptedException ex) {
+            telemetry.addLine("Sleep was interrupted");
         }
+
+        tfod.shutdown();
     }
 
     private boolean isSkystoneDetected() {
