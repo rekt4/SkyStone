@@ -122,8 +122,8 @@ public class ObjectDetectionAutonomous extends LinearOpMode {
         frontLeft.setTargetPosition(targetPositionLeft);
         frontRight.setTargetPosition(targetPositionRight);
 
-        frontLeft.setPower(0.1);
-        frontRight.setPower(0.1);
+        frontLeft.setPower(0.05);
+        frontRight.setPower(0.05);
 
 
         while (frontLeft.getCurrentPosition() > (-1 * increment) && frontRight.getCurrentPosition() > (-1 * increment)) {
