@@ -21,11 +21,8 @@ public class Base_Spool_Claw extends LinearOpMode {
     // The leftRight controls the horizontal motion
     private DcMotor leftRight = null;
 
-    // The claw controls the front-back claw
-    private Servo claw = null;
-
-    // A position of 0.5 means the claw stops
-    private double clawPosition = 0.5;
+    // The frontBack controls the front-back claw
+    private DcMotor frontBack = null;
 
     public void runOpMode(){
 
@@ -33,8 +30,8 @@ public class Base_Spool_Claw extends LinearOpMode {
         frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
         frontRight = hardwareMap.get(DcMotor.class, "frontRight");
         spool = hardwareMap.get(DcMotor.class, "spool");
-        claw = hardwareMap.get(Servo.class, "claw");
         leftRight = hardwareMap.get(DcMotor.class, "leftRight");
+        frontBack = hardwareMap.get(DcMotor.class, "frontBack");
 
 
         // This always updates telemetry
@@ -44,26 +41,41 @@ public class Base_Spool_Claw extends LinearOpMode {
 
         // This is sets the original joystick power
         double spoolLeftStick=0;
+        double leftRightReqPower=0;
         double fbLeftStick=0;
         double fbRightStick=0;
-        double leftRightReqPower=0;
+        double frontBackRp=0;
         frontRight.setDirection(DcMotor.Direction.REVERSE);
 
         while(opModeIsActive()){
             // Using methods created, the spool and the z-movement claw part will be 'activated'
+
+            //what are we doing with the spool motor?
+
             spoolLeftStick = -this.gamepad2.left_stick_y;
             setPowerToSpool(spoolLeftStick);
 
-            leftRightReqPower = this.gamepad2.right_stick_x;
-            setPowerToLeftRight(leftRightReqPower);
+            //what are we doing with the front back motion?
+
+            frontBackRp = this.gamepad2.right_stick_x;
+            frontBack.setPower(frontBackRp/4);
+
+            // What are we doing with the left right motion?
+            if (this.gamepad2.left_bumper) {
+                leftRight.setPower(0.5);
+            } else if (this.gamepad2.right_bumper){
+                leftRight.setPower(-0.5);
+            } else {
+                leftRight.setPower(0);
+            }
 
             // We first need to stop the claw servo from moving if it is moving
-            claw.setPosition(0.5);
+            //claw.setPosition(0.5);
 
             // Using other methods, we also 'activate' the actual claw mechanism
-            stopClaw();
-            openClaw();
-            closeClaw();
+            //stopClaw();
+            //openClaw();
+            //closeClaw();
 
             // Finally the tank is also 'activated'
             fbLeftStick = -this.gamepad1.left_stick_y;
@@ -91,33 +103,33 @@ public class Base_Spool_Claw extends LinearOpMode {
 
     }
 
-    public void openClaw() {
-        if (gamepad2.y) {
-            clawPosition = 0.9;
-        }
-        claw.setPosition(clawPosition);
-        telemetry.addData("Claw Power", clawPosition);
-    }
+//    public void openClaw() {
+//        if (gamepad2.y) {
+//            clawPosition = 0.9;
+//        }
+//        claw.setPosition(clawPosition);
+//        telemetry.addData("Claw Power", clawPosition);
+//    }
 
-    public void closeClaw() {
-        if (gamepad2.a) {
-            clawPosition = 0.1;
-        }
-        claw.setPosition(clawPosition);
-        telemetry.addData("Claw Power", clawPosition);
-    }
+//    public void closeClaw() {
+//        if (gamepad2.a) {
+//            clawPosition = 0.1;
+//        }
+//        claw.setPosition(clawPosition);
+//        telemetry.addData("Claw Power", clawPosition);
+//    }
 
-    public void stopClaw() {
-        if(gamepad2.b) {
-            clawPosition = 0.5;
-        }
-        claw.setPosition(clawPosition);
-        telemetry.addData("Claw Power", clawPosition);
-    }
+//    public void stopClaw() {
+//        if(gamepad2.b) {
+//            clawPosition = 0.5;
+//        }
+//        claw.setPosition(clawPosition);
+//        telemetry.addData("Claw Power", clawPosition);
+//    }
 
 
-    public void setPowerToLeftRight(double power) {
-        leftRight.setPower(-power);
-        telemetry.addData("Left/Right Power", power);
-    }
+//    public void setPowerToLeftRight(double power) {
+//        leftRight.setPower(-power);
+//        telemetry.addData("Left/Right Power", power);
+//    }
 }
