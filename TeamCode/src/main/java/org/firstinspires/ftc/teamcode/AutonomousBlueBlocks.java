@@ -78,6 +78,9 @@ public class AutonomousBlueBlocks extends LinearOpMode {
         frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        // set spool to stop with brakes on
+        spool.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         // This always updates telemetry
         telemetry.addData("Status", "Boundless Robotics Ready to Launch");
         telemetry.update();
@@ -108,36 +111,13 @@ public class AutonomousBlueBlocks extends LinearOpMode {
 
         // Step 7: Drop off the block.
         openClaw(0.5, 0.2);
-        spoolUp(0.5, 2.0);
+        spoolUp(0.8, 1.0);
         driveUsingEncoder(0.1, 4,4,1);
-
         closeClaw(0.5, 0.5);
-        spoolDown(0.5, 0.8);
+        spoolDown(0.8, 1.0);
 
-        // Step 8: Drive back all the way to the wall.
-        driveUsingEncoder(0.75, 110, 110, 15);
-
-        // Step 9: Turn to get another block.
-        driveUsingEncoder(0.3, 4, 4, 3);
-        turnRightUsingEncoder(0.3, 0, 7);
-        printCurrentAngle();
-        driveUsingEncoder(0.5,12,12,5);
-
-        // Step 10: Open the claw and raise the spool.
-        openClaw(0.5, 0.8);
-        spoolUp(0.5, 2.2);
-
-        // Step 11: Go forward and pick up a block.
-        driveUsingEncoder(0.3, -40, -40, 12);
-        spoolDown(0.7, 1);
-        closeClaw(0.3, 1);
-
-        // Step 12: Drive back with the block.
-        driveUsingEncoder(0.3, 42, 42, 12);
-
-        // Step 13: Turn left to deposit second block.
-        driveUsingEncoder(0.1, -12, -12, 5);
-        turnLeftUsingEncoder(0.3, 78.0, 7);
+        // Step 8: Drive under the bridge
+        driveUsingEncoder(0.1, 4, 4, 3);
     }
 
     public void printCurrentAngle() {
