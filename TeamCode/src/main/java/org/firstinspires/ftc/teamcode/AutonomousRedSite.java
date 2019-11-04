@@ -84,30 +84,37 @@ public class AutonomousRedSite extends LinearOpMode {
 
         waitForStart();
 
-        spoolUp(0.5, 1.5);
-        driveUsingEncoder(0.3, -50, -45, 12);
-        spoolDown(0.5, 1.3);
+        // Step 1: Get the building site close to the wall.
+        spoolUp(1, 0.5);
+        driveUsingEncoder(0.5, -40,-40, 5);
+        spoolDown(1,0.5);
+        driveUsingEncoder(0.3, 38,38, 5);
 
+        // Step 2: Turn left and align next to the building site.
+        spoolUp(1, 1);
+        turnRightUsingEncoder(0.3, 90.0, 5);
+        driveUsingEncoder(0.3, 40,40, 5);
+        turnLeftUsingEncoder(0.3, 0, 5);
+        driveUsingEncoder(0.3, 20, 20, 3);
 
-        driveUsingEncoder(0.2, 12, 12, 5.0);
-        spoolUp(0.5, 0.5);
-        driveUsingEncoder(0.1, -1, -1, 3.0);
-        spoolDown(0.5, 0.5);
+        // Step 3: Go around the building site.
+        driveUsingEncoder(0.5, -60, -60, 5);
+        turnLeftUsingEncoder(0.3,85, 3);
+        driveUsingEncoder(0.5, 35, 35, 5);
+        turnLeftUsingEncoder(0.3, 85, 5);
 
+        // Step 4: Push the building site
+        driveUsingEncoder(0.3, 40, 40, 5);
 
-        driveUsingEncoder(0.2, 11, 11, 5.0);
-        spoolUp(0.5, 0.5);
-        driveUsingEncoder(0.1, -1, -1, 3.0);
-        spoolDown(0.5, 0.5);
-
-
-        driveUsingEncoder(0.2, 9, 9, 5.0);
-        spoolUp(0.5, 0.5);
-        driveUsingEncoder(0.1, -1, -1, 3.0);
-        spoolDown(0.5, 0.5);
 
     }
 
+    public void printCurrentAngle() {
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        telemetry.addData("Current Angle: ", angles.firstAngle);
+        telemetry.update();
+        try { Thread.sleep(2000); } catch(Exception ex) {}
+    }
 
     /**
      * Utility method to move the robot using encoder values
@@ -156,7 +163,7 @@ public class AutonomousRedSite extends LinearOpMode {
      * @param targetAngle
      * @param timeoutSeconds
      */
-    public void turnUsingEncoder(double speed, double targetAngle, double timeoutSeconds) {
+    public void turnLeftUsingEncoder(double speed, double targetAngle, double timeoutSeconds) {
         double turnRemaining;
         int newLeftTarget;
         int newRightTarget;
@@ -176,8 +183,57 @@ public class AutonomousRedSite extends LinearOpMode {
             telemetry.update();
 
             // Determine new target position.
-            newLeftTarget = frontLeft.getCurrentPosition() - (int) ((turnRemaining / 360) * 2880);
-            newRightTarget = frontRight.getCurrentPosition() + (int) ((turnRemaining / 360) * 2880);
+            newLeftTarget = frontLeft.getCurrentPosition() - (int) ((turnRemaining / 360) * 2335);
+            newRightTarget = frontRight.getCurrentPosition() + (int) ((turnRemaining / 360) * 2335);
+
+
+            // Power will also be a function of turnRemaining. Big turnRemaining = fast, small turnRemaining = slow
+            if (Math.abs(turnRemaining) > 50) {
+                rotPow = 0.8 * speed;
+            } else if (Math.abs(turnRemaining) > 40) {
+                rotPow = 0.6 * speed;
+            } else if (Math.abs(turnRemaining) > 30) {
+                rotPow = 0.4 * speed;
+            } else if (Math.abs(turnRemaining) > 20) {
+                rotPow = 0.3 * speed;
+            } else if (Math.abs(turnRemaining) > 10) {
+                rotPow = 0.2 * speed;
+            } else {
+                rotPow = 0.1 * speed;
+            }
+            moveUsingEncoder(newLeftTarget, newRightTarget, rotPow, timeoutSeconds);
+        }
+
+    }
+
+    /**
+     *
+     * @param speed
+     * @param targetAngle
+     * @param timeoutSeconds
+     */
+    public void turnRightUsingEncoder(double speed, double targetAngle, double timeoutSeconds) {
+        double turnRemaining;
+        int newLeftTarget;
+        int newRightTarget;
+        double rotPow;
+
+        for (int idx = 0; idx < 15; idx++) {
+            // Determine how much our heading is off.
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            turnRemaining = targetAngle + angles.firstAngle;
+
+            // Get out of loop early if there is no turnRemaining.
+            if (turnRemaining <= 0) {
+                break;
+            }
+
+            telemetry.addData("Turn Remaining", "" + turnRemaining);
+            telemetry.update();
+
+            // Determine new target position.
+            newLeftTarget = frontLeft.getCurrentPosition() + (int) ((turnRemaining / 360) * 2335);
+            newRightTarget = frontRight.getCurrentPosition() - (int) ((turnRemaining / 360) * 2335);
 
 
             // Power will also be a function of turnRemaining. Big turnRemaining = fast, small turnRemaining = slow
@@ -232,5 +288,19 @@ public class AutonomousRedSite extends LinearOpMode {
         spool.setPower(-1 * speed);
         try { Thread.sleep(timeoutInMillis); } catch(Exception ex) {}
         spool.setPower(0);
+    }
+
+    public void openClaw(double speed, double timeoutSeconds) {
+        frontBack.setPower(speed);
+        long timeoutInMillis = (long) (timeoutSeconds * 1000);
+        try { Thread.sleep(timeoutInMillis); } catch(Exception ex) {}
+        frontBack.setPower(0);
+    }
+
+    public void closeClaw(double speed, double timeoutSeconds) {
+        frontBack.setPower(-1 * speed);
+        long timeoutInMillis = (long) (timeoutSeconds * 1000);
+        try { Thread.sleep(timeoutInMillis); } catch(Exception ex) {}
+        frontBack.setPower(0);
     }
 }
