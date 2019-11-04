@@ -5,7 +5,6 @@ import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -82,62 +81,120 @@ public class AutonomousRedSite extends LinearOpMode {
         // This always updates telemetry
         telemetry.addData("Status", "Boundless Robotics Ready to Launch");
         telemetry.update();
+
         waitForStart();
 
-        driveUsingEncoder(DRIVE_SPEED,  12,  12, 15.0);
-        driveUsingEncoder(DRIVE_SPEED,  -5,  5, 15.0);
+        spoolUp(0.5, 1.5);
+        driveUsingEncoder(0.3, -50, -45, 12);
+        spoolDown(0.5, 1.3);
+
+
+        driveUsingEncoder(0.2, 12, 12, 5.0);
+        spoolUp(0.5, 0.5);
+        driveUsingEncoder(0.1, -1, -1, 3.0);
+        spoolDown(0.5, 0.5);
+
+
+        driveUsingEncoder(0.2, 11, 11, 5.0);
+        spoolUp(0.5, 0.5);
+        driveUsingEncoder(0.1, -1, -1, 3.0);
+        spoolDown(0.5, 0.5);
+
+
+        driveUsingEncoder(0.2, 9, 9, 5.0);
+        spoolUp(0.5, 0.5);
+        driveUsingEncoder(0.1, -1, -1, 3.0);
+        spoolDown(0.5, 0.5);
+
     }
 
-    public void turnUsingEncoder(double targetAngle) {
-        double error;
+
+    /**
+     * Utility method to move the robot using encoder values
+     * @param newLeftTarget -- This is the Left wheel's target position.
+     * @param newRightTarget
+     * @param speed
+     * @param timeoutSeconds
+     */
+    public void moveUsingEncoder(int newLeftTarget, int newRightTarget, double speed, double timeoutSeconds) {
+        //new target calculated
+        frontLeft.setTargetPosition(newLeftTarget);
+        frontRight.setTargetPosition(newRightTarget);
+
+        // Turn On RUN_TO_POSITION
+        frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        // reset the timeout time and start motion.
+        runtime.reset();
+        frontLeft.setPower(Math.abs(speed));
+        frontRight.setPower(Math.abs(speed));
+
+        while (opModeIsActive() &&
+                (runtime.seconds() < timeoutSeconds) &&
+                (frontLeft.isBusy() && frontRight.isBusy())) {
+
+            // Display it for the driver.
+            telemetry.addData("Path1", "Running to %7d :%7d", newLeftTarget, newRightTarget);
+            telemetry.addData("Path2", "Running at %7d :%7d",
+                    frontLeft.getCurrentPosition(),
+                    frontRight.getCurrentPosition());
+            telemetry.update();
+        }
+        // Stop all motion;
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+
+        // Turn off RUN_TO_POSITION
+        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    /**
+     *
+     * @param speed
+     * @param targetAngle
+     * @param timeoutSeconds
+     */
+    public void turnUsingEncoder(double speed, double targetAngle, double timeoutSeconds) {
+        double turnRemaining;
         int newLeftTarget;
         int newRightTarget;
         double rotPow;
-        double speedScale = 0.5;
 
         for (int idx = 0; idx < 15; idx++) {
-
             // Determine how much our heading is off.
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            error = targetAngle - angles.firstAngle;
+            turnRemaining = targetAngle - angles.firstAngle;
 
-            // Get out of loop early if there is no error.
-            if (error == 0) {
+            // Get out of loop early if there is no turnRemaining.
+            if (turnRemaining <= 0) {
                 break;
             }
+
+            telemetry.addData("Turn Remaining", "" + turnRemaining);
+            telemetry.update();
+
             // Determine new target position.
-            newLeftTarget = frontLeft.getCurrentPosition() + (int) (error / 360 * 4000);
-            newRightTarget = frontRight.getCurrentPosition() - (int) (error / 360 * 4000);
+            newLeftTarget = frontLeft.getCurrentPosition() - (int) ((turnRemaining / 360) * 2880);
+            newRightTarget = frontRight.getCurrentPosition() + (int) ((turnRemaining / 360) * 2880);
 
-            //new target calculated
-            frontLeft.setTargetPosition(newLeftTarget);
-            frontRight.setTargetPosition(newRightTarget);
 
-            // Power will also be a function of error. Big error = fast, small error = slow
-            if (Math.abs(error) > 50) {
-                rotPow = 0.8 * speedScale;
-            } else if (Math.abs(error) > 40) {
-                rotPow = 0.6 * speedScale;
-            } else if (Math.abs(error) > 30) {
-                rotPow = 0.4 * speedScale;
-            } else if (Math.abs(error) > 20) {
-                rotPow = 0.3 * speedScale;
-            } else if (Math.abs(error) > 10) {
-                rotPow = 0.2 * speedScale;
+            // Power will also be a function of turnRemaining. Big turnRemaining = fast, small turnRemaining = slow
+            if (Math.abs(turnRemaining) > 50) {
+                rotPow = 0.8 * speed;
+            } else if (Math.abs(turnRemaining) > 40) {
+                rotPow = 0.6 * speed;
+            } else if (Math.abs(turnRemaining) > 30) {
+                rotPow = 0.4 * speed;
+            } else if (Math.abs(turnRemaining) > 20) {
+                rotPow = 0.3 * speed;
+            } else if (Math.abs(turnRemaining) > 10) {
+                rotPow = 0.2 * speed;
             } else {
-                rotPow = 0.1 * speedScale;
+                rotPow = 0.1 * speed;
             }
-
-            // Do the incremental turn.
-            frontLeft.setPower(rotPow);
-            frontRight.setPower(rotPow);
-
-            while (frontLeft.isBusy() && frontRight.isBusy()) {
-            }
-
-            // Stop all motion. This also applies the brakes.
-            frontLeft.setPower(0);
-            frontRight.setPower(0);
+            moveUsingEncoder(newLeftTarget, newRightTarget, rotPow, timeoutSeconds);
         }
 
     }
@@ -145,7 +202,7 @@ public class AutonomousRedSite extends LinearOpMode {
     public void driveUsingEncoder(double speed, double leftInches, double rightInches, double timeoutSeconds) {
 
         final double COUNTS_PER_MOTOR_REV = 1440;    // eg: TETRIX Motor Encoder
-        final double DRIVE_GEAR_REDUCTION = 2.0;     // This is < 1.0 if geared UP
+        final double DRIVE_GEAR_REDUCTION = 0.25;     // This is < 1.0 if geared UP
         final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
         final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
 
@@ -160,42 +217,20 @@ public class AutonomousRedSite extends LinearOpMode {
         // Determine new target position, and pass to motor controller
         newLeftTarget = frontLeft.getCurrentPosition() + (int) (leftInches * COUNTS_PER_INCH);
         newRightTarget = frontRight.getCurrentPosition() + (int) (rightInches * COUNTS_PER_INCH);
-        frontLeft.setTargetPosition(newLeftTarget);
-        frontRight.setTargetPosition(newRightTarget);
+        moveUsingEncoder(newLeftTarget, newRightTarget, speed, timeoutSeconds);
+    }
 
-        // Turn On RUN_TO_POSITION
-        frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    public void spoolUp(double speed, double timeoutSeconds) {
+        long timeoutInMillis = (long) (timeoutSeconds * 1000);
+        spool.setPower(speed);
+        try { Thread.sleep(timeoutInMillis); } catch(Exception ex) {}
+        spool.setPower(0);
+    }
 
-        // reset the timeout time and start motion.
-        runtime.reset();
-        frontLeft.setPower(Math.abs(speed));
-        frontRight.setPower(Math.abs(speed));
-
-        // keep looping while we are still active, and there is time left, and both motors are running.
-        // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
-        // its target position, the motion will stop.  This is "safer" in the event that the robot will
-        // always end the motion as soon as possible.
-        // However, if you require that BOTH motors have finished their moves before the robot continues
-        // onto the next step, use (isBusy() || isBusy()) in the loop test.
-        while (opModeIsActive() &&
-                (runtime.seconds() < timeoutSeconds) &&
-                (frontLeft.isBusy() && frontRight.isBusy())) {
-
-            // Display it for the driver.
-            telemetry.addData("Path1", "Running to %7d :%7d", newLeftTarget, newRightTarget);
-            telemetry.addData("Path2", "Running at %7d :%7d",
-                    frontLeft.getCurrentPosition(),
-                    frontRight.getCurrentPosition());
-            telemetry.update();
-        }
-
-        // Stop all motion;
-        frontLeft.setPower(0);
-        frontRight.setPower(0);
-
-        // Turn off RUN_TO_POSITION
-        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    public void spoolDown(double speed, double timeoutSeconds) {
+        long timeoutInMillis = (long) (timeoutSeconds * 1000);
+        spool.setPower(-1 * speed);
+        try { Thread.sleep(timeoutInMillis); } catch(Exception ex) {}
+        spool.setPower(0);
     }
 }
