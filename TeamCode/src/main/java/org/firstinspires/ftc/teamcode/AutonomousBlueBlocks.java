@@ -88,36 +88,36 @@ public class AutonomousBlueBlocks extends LinearOpMode {
         waitForStart();
 
         // Step 1: Open the Claw and lift the spool
-        openClaw(0.5, 0.8);
-        spoolUp(0.5, 2.0);
+        openClaw(0.3, 0.8);
+        spoolUp(1, 1.0);
 
         // Step 2: Drive forward by 40 inches
-        driveUsingEncoder(0.3, -40, -40, 12);
+        driveUsingEncoder(0.3, -40, -40, 5);
 
         // Step 3: Lower the spool & claw; Be careful here because the spool may have dropped a bit
         //         because of the weight.
-        spoolDown(0.7, 1);
+        spoolDown(1, 1);
         closeClaw(0.3, 1);
 
         // Step 4: Pull the robot & the block back
-        driveUsingEncoder(0.3, 42, 42, 12);
+        driveUsingEncoder(0.75, 45, 45, 5);
 
         // Step 5: Move forward by a bit - so we can get a proper turn & turn by 90 degrees
-        driveUsingEncoder(0.1, -12, -12, 5);
-        turnLeftUsingEncoder(0.3, 78.0, 7);
+        driveUsingEncoder(0.3, -6, -6, 5);
+        turnLeftUsingEncoder(0.3, 90.0, 7);
 
         // Step 6: Drive across the bridge, and drop off the block.
-        driveUsingEncoder(0.75, -50, -50, 15);
+        driveUsingEncoder(0.8, -45, -45, 5);
 
         // Step 7: Drop off the block.
         openClaw(0.5, 0.2);
-        spoolUp(0.8, 1.0);
-        driveUsingEncoder(0.1, 4,4,1);
-        closeClaw(0.5, 0.5);
-        spoolDown(0.8, 1.0);
+        spoolUp(1, 0.8);
+        driveUsingEncoder(0.4, 14,14,5);
+        closeClaw(0.5, 0.6);
+        spoolDown(1, 0.7);
 
-        // Step 8: Drive under the bridge
-        driveUsingEncoder(0.1, 4, 4, 3);
+//        // Step 8: Drive under the bridge
+//        driveUsingEncoder(0.1, 6, 6, 3);
     }
 
     public void printCurrentAngle() {
@@ -194,8 +194,8 @@ public class AutonomousBlueBlocks extends LinearOpMode {
             telemetry.update();
 
             // Determine new target position.
-            newLeftTarget = frontLeft.getCurrentPosition() - (int) ((turnRemaining / 360) * 2880);
-            newRightTarget = frontRight.getCurrentPosition() + (int) ((turnRemaining / 360) * 2880);
+            newLeftTarget = frontLeft.getCurrentPosition() - (int) ((turnRemaining / 360) * 2335);
+            newRightTarget = frontRight.getCurrentPosition() + (int) ((turnRemaining / 360) * 2335);
 
 
             // Power will also be a function of turnRemaining. Big turnRemaining = fast, small turnRemaining = slow
@@ -243,8 +243,8 @@ public class AutonomousBlueBlocks extends LinearOpMode {
             telemetry.update();
 
             // Determine new target position.
-            newLeftTarget = frontLeft.getCurrentPosition() + (int) ((turnRemaining / 360) * 2880);
-            newRightTarget = frontRight.getCurrentPosition() - (int) ((turnRemaining / 360) * 2880);
+            newLeftTarget = frontLeft.getCurrentPosition() + (int) ((turnRemaining / 360) * 2335);
+            newRightTarget = frontRight.getCurrentPosition() - (int) ((turnRemaining / 360) * 2335);
 
 
             // Power will also be a function of turnRemaining. Big turnRemaining = fast, small turnRemaining = slow
