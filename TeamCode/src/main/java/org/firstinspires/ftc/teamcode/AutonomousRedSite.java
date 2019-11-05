@@ -93,19 +93,26 @@ public class AutonomousRedSite extends LinearOpMode {
         // Step 2: Turn left and align next to the building site.
         spoolUp(1, 1);
         turnRightUsingEncoder(0.3, 90.0, 5);
-        driveUsingEncoder(0.3, 40,40, 5);
+        driveUsingEncoder(0.5, 39,39, 5);
         turnLeftUsingEncoder(0.3, 0, 5);
-        driveUsingEncoder(0.3, 20, 20, 3);
+        driveUsingEncoder(0.5, 20, 20, 3);
 
         // Step 3: Go around the building site.
-        driveUsingEncoder(0.5, -60, -60, 5);
-        turnLeftUsingEncoder(0.3,85, 3);
-        driveUsingEncoder(0.5, 35, 35, 5);
-        turnLeftUsingEncoder(0.3, 85, 5);
+        driveUsingEncoder(0.6, -60, -60, 5);
+        turnLeftUsingEncoder(0.3,83, 3);
+        driveUsingEncoder(0.6, 35, 35, 5);
+        turnLeftUsingEncoder(0.3, 166, 5);
 
-        // Step 4: Push the building site
-        driveUsingEncoder(0.3, 40, 40, 5);
+        // Step 4: Push the building site.
+        driveUsingEncoder(0.3, -40, -40, 5);
 
+        // Step 5: Back up and turn right.
+        driveUsingEncoder(0.5, 5, 5, 5);
+        turnRightUsingEncoder(0.3, -83, 3);
+        driveUsingEncoder(0.6, 30, 30, 5);
+
+        spoolDown(1, 0.2);
+        driveUsingEncoder(0.5, -65, -65, 5);
 
     }
 

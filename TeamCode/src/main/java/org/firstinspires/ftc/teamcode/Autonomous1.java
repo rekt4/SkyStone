@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
@@ -22,7 +23,7 @@ import java.util.List;
 
 
 @Autonomous(name = "Autonomous1", group = "boundless")
-
+@Disabled
 public class Autonomous1 extends LinearOpMode {
 
     private DcMotor spool = null;       // Motor to control the up/down spool
