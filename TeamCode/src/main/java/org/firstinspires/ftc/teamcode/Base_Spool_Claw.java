@@ -58,7 +58,7 @@ public class Base_Spool_Claw extends LinearOpMode {
             //what are we doing with the front back motion?
 
             frontBackRp = this.gamepad2.right_stick_y;
-            frontBack.setPower(frontBackRp/4);
+            frontBack.setPower(-1*frontBackRp/4);
 
             // What are we doing with the left right motion?
             if (this.gamepad2.left_bumper) {
