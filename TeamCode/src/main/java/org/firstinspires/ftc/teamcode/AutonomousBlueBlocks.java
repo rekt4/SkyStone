@@ -92,7 +92,7 @@ public class AutonomousBlueBlocks extends LinearOpMode {
         spoolUp(1, 1.0);
 
         // Step 2: Drive forward by 40 inches
-        driveUsingEncoder(0.3, -40, -40, 5);
+        driveUsingEncoder(0.3, -39, -39, 5);
 
         // Step 3: Lower the spool & claw; Be careful here because the spool may have dropped a bit
         //         because of the weight.
@@ -104,7 +104,7 @@ public class AutonomousBlueBlocks extends LinearOpMode {
 
         // Step 5: Move forward by a bit - so we can get a proper turn & turn by 90 degrees
         driveUsingEncoder(0.3, -6, -6, 5);
-        turnLeftUsingEncoder(0.3, 90.0, 7);
+        turnLeftUsingEncoder(0.3, 75.0, 7);
 
         // Step 6: Drive across the bridge, and drop off the block.
         driveUsingEncoder(0.8, -45, -45, 5);

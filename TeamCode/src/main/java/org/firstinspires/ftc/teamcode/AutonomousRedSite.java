@@ -86,33 +86,34 @@ public class AutonomousRedSite extends LinearOpMode {
 
         // Step 1: Get the building site close to the wall.
         spoolUp(1, 0.5);
-        driveUsingEncoder(0.5, -40,-40, 5);
-        spoolDown(1,0.5);
-        driveUsingEncoder(0.3, 38,38, 5);
+        driveUsingEncoder(0.3, -39,-39, 5);
+        spoolDown(1,0.1);
+        try { Thread.sleep(500); } catch(Exception ex) {}
+        driveUsingEncoder(0.4, 32,32, 5);
 
-        // Step 2: Turn left and align next to the building site.
-        spoolUp(1, 1);
-        turnRightUsingEncoder(0.3, 90.0, 5);
-        driveUsingEncoder(0.5, 39,39, 5);
-        turnLeftUsingEncoder(0.3, 0, 5);
-        driveUsingEncoder(0.5, 20, 20, 3);
+       //Step 2: Turn left and align next to the building site.
+        spoolUp(1, 0.5);
+        driveUsingEncoder(0.3, 4.5, 4.5, 5);
+        turnRightUsingEncoder(1, 90, 1);
+        driveUsingEncoder(0.4, 46,46, 5);
+        turnLeftUsingEncoder(1, 1, 1);
+        spoolDown(1,0.05);
+        driveUsingEncoder(0.3, 20, 20, 3);
 
         // Step 3: Go around the building site.
         driveUsingEncoder(0.6, -60, -60, 5);
-        turnLeftUsingEncoder(0.3,83, 3);
+        turnLeftUsingEncoder(0.8,90, 1);
         driveUsingEncoder(0.6, 35, 35, 5);
-        turnLeftUsingEncoder(0.3, 166, 5);
+        turnLeftUsingEncoder(0.8, 165, 1);
 
         // Step 4: Push the building site.
-        driveUsingEncoder(0.3, -40, -40, 5);
+        driveUsingEncoder(0.3, -42, -42, 5);
 
-        // Step 5: Back up and turn right.
-        driveUsingEncoder(0.5, 5, 5, 5);
-        turnRightUsingEncoder(0.3, -83, 3);
-        driveUsingEncoder(0.6, 30, 30, 5);
-
-        spoolDown(1, 0.2);
-        driveUsingEncoder(0.5, -65, -65, 5);
+        // Step 5: Back up and turn right + go forward to bridge.
+        driveUsingEncoder(0.6, 4, 4, 5);
+        turnRightUsingEncoder(0.8, -90, 1);
+        driveUsingEncoder(0.8, 40, 40, 5);
+        driveUsingEncoder(0.6, -65, -65, 5);
 
     }
 
@@ -175,14 +176,15 @@ public class AutonomousRedSite extends LinearOpMode {
         int newLeftTarget;
         int newRightTarget;
         double rotPow;
+        double RealTimeOut;
 
-        for (int idx = 0; idx < 15; idx++) {
+        for (int idx = 0; idx < 10; idx++) {
             // Determine how much our heading is off.
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             turnRemaining = targetAngle - angles.firstAngle;
 
             // Get out of loop early if there is no turnRemaining.
-            if (turnRemaining <= 0) {
+            if (turnRemaining <= 2) {
                 break;
             }
 
@@ -197,18 +199,24 @@ public class AutonomousRedSite extends LinearOpMode {
             // Power will also be a function of turnRemaining. Big turnRemaining = fast, small turnRemaining = slow
             if (Math.abs(turnRemaining) > 50) {
                 rotPow = 0.8 * speed;
+                RealTimeOut = timeoutSeconds * 1;
             } else if (Math.abs(turnRemaining) > 40) {
                 rotPow = 0.6 * speed;
+                RealTimeOut = timeoutSeconds * 0.8;
             } else if (Math.abs(turnRemaining) > 30) {
                 rotPow = 0.4 * speed;
+                RealTimeOut = timeoutSeconds * 0.6;
             } else if (Math.abs(turnRemaining) > 20) {
                 rotPow = 0.3 * speed;
+                RealTimeOut = timeoutSeconds * 0.4;
             } else if (Math.abs(turnRemaining) > 10) {
-                rotPow = 0.2 * speed;
+                rotPow = 0.3 * speed;
+                RealTimeOut = timeoutSeconds *0.2;
             } else {
-                rotPow = 0.1 * speed;
+                rotPow = 0.3 * speed;
+                RealTimeOut = timeoutSeconds * 0.1;
             }
-            moveUsingEncoder(newLeftTarget, newRightTarget, rotPow, timeoutSeconds);
+            moveUsingEncoder(newLeftTarget, newRightTarget, rotPow, RealTimeOut);
         }
 
     }
@@ -224,14 +232,15 @@ public class AutonomousRedSite extends LinearOpMode {
         int newLeftTarget;
         int newRightTarget;
         double rotPow;
+        double RealTimeOut;
 
-        for (int idx = 0; idx < 15; idx++) {
+        for (int idx = 0; idx < 10; idx++) {
             // Determine how much our heading is off.
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             turnRemaining = targetAngle + angles.firstAngle;
 
             // Get out of loop early if there is no turnRemaining.
-            if (turnRemaining <= 0) {
+            if (turnRemaining <= 2) {
                 break;
             }
 
@@ -244,20 +253,27 @@ public class AutonomousRedSite extends LinearOpMode {
 
 
             // Power will also be a function of turnRemaining. Big turnRemaining = fast, small turnRemaining = slow
+
             if (Math.abs(turnRemaining) > 50) {
                 rotPow = 0.8 * speed;
+                RealTimeOut = timeoutSeconds * 1;
             } else if (Math.abs(turnRemaining) > 40) {
                 rotPow = 0.6 * speed;
+                RealTimeOut = timeoutSeconds * 0.8;
             } else if (Math.abs(turnRemaining) > 30) {
                 rotPow = 0.4 * speed;
+                RealTimeOut = timeoutSeconds * 0.6;
             } else if (Math.abs(turnRemaining) > 20) {
                 rotPow = 0.3 * speed;
+                RealTimeOut = timeoutSeconds * 0.3;
             } else if (Math.abs(turnRemaining) > 10) {
-                rotPow = 0.2 * speed;
+                rotPow = 0.3 * speed;
+                RealTimeOut = timeoutSeconds * 0.3;
             } else {
-                rotPow = 0.1 * speed;
+                rotPow = 0.3 * speed;
+                RealTimeOut = timeoutSeconds * 0.1;
             }
-            moveUsingEncoder(newLeftTarget, newRightTarget, rotPow, timeoutSeconds);
+            moveUsingEncoder(newLeftTarget, newRightTarget, rotPow, RealTimeOut);
         }
 
     }
