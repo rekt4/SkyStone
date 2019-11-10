@@ -104,7 +104,7 @@ public class AutonomousBlueBlocks extends LinearOpMode {
 
         // Step 5: Move forward by a bit - so we can get a proper turn & turn by 90 degrees
         driveUsingEncoder(0.3, -6, -6, 5);
-        turnLeftUsingEncoder(0.3, 75.0, 7);
+        turnLeftUsingEncoder(0.8, 80, 5);
 
         // Step 6: Drive across the bridge, and drop off the block.
         driveUsingEncoder(0.8, -45, -45, 5);
@@ -115,9 +115,6 @@ public class AutonomousBlueBlocks extends LinearOpMode {
         driveUsingEncoder(0.4, 14,14,5);
         closeClaw(0.5, 0.6);
         spoolDown(1, 0.7);
-
-//        // Step 8: Drive under the bridge
-//        driveUsingEncoder(0.1, 6, 6, 3);
     }
 
     public void printCurrentAngle() {
@@ -179,14 +176,15 @@ public class AutonomousBlueBlocks extends LinearOpMode {
         int newLeftTarget;
         int newRightTarget;
         double rotPow;
+        double realTimeOut;
 
-        for (int idx = 0; idx < 15; idx++) {
+        for (int idx = 0; idx < 10; idx++) {
             // Determine how much our heading is off.
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             turnRemaining = targetAngle - angles.firstAngle;
 
             // Get out of loop early if there is no turnRemaining.
-            if (turnRemaining <= 0) {
+            if (turnRemaining <= 2) {
                 break;
             }
 
@@ -201,67 +199,24 @@ public class AutonomousBlueBlocks extends LinearOpMode {
             // Power will also be a function of turnRemaining. Big turnRemaining = fast, small turnRemaining = slow
             if (Math.abs(turnRemaining) > 50) {
                 rotPow = 0.8 * speed;
+                realTimeOut = timeoutSeconds * 1;
             } else if (Math.abs(turnRemaining) > 40) {
                 rotPow = 0.6 * speed;
+                realTimeOut = timeoutSeconds * 0.8;
             } else if (Math.abs(turnRemaining) > 30) {
                 rotPow = 0.4 * speed;
+                realTimeOut = timeoutSeconds * 0.6;
             } else if (Math.abs(turnRemaining) > 20) {
                 rotPow = 0.3 * speed;
+                realTimeOut = timeoutSeconds * 0.4;
             } else if (Math.abs(turnRemaining) > 10) {
-                rotPow = 0.2 * speed;
-            } else {
-                rotPow = 0.1 * speed;
-            }
-            moveUsingEncoder(newLeftTarget, newRightTarget, rotPow, timeoutSeconds);
-        }
-
-    }
-
-    /**
-     *
-     * @param speed
-     * @param targetAngle
-     * @param timeoutSeconds
-     */
-    public void turnRightUsingEncoder(double speed, double targetAngle, double timeoutSeconds) {
-        double turnRemaining;
-        int newLeftTarget;
-        int newRightTarget;
-        double rotPow;
-
-        for (int idx = 0; idx < 15; idx++) {
-            // Determine how much our heading is off.
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            turnRemaining = targetAngle + angles.firstAngle;
-
-            // Get out of loop early if there is no turnRemaining.
-            if (turnRemaining <= 0) {
-                break;
-            }
-
-            telemetry.addData("Turn Remaining", "" + turnRemaining);
-            telemetry.update();
-
-            // Determine new target position.
-            newLeftTarget = frontLeft.getCurrentPosition() + (int) ((turnRemaining / 360) * 2335);
-            newRightTarget = frontRight.getCurrentPosition() - (int) ((turnRemaining / 360) * 2335);
-
-
-            // Power will also be a function of turnRemaining. Big turnRemaining = fast, small turnRemaining = slow
-            if (Math.abs(turnRemaining) > 50) {
-                rotPow = 0.8 * speed;
-            } else if (Math.abs(turnRemaining) > 40) {
-                rotPow = 0.6 * speed;
-            } else if (Math.abs(turnRemaining) > 30) {
-                rotPow = 0.4 * speed;
-            } else if (Math.abs(turnRemaining) > 20) {
                 rotPow = 0.3 * speed;
-            } else if (Math.abs(turnRemaining) > 10) {
-                rotPow = 0.2 * speed;
+                realTimeOut = timeoutSeconds *0.2;
             } else {
-                rotPow = 0.1 * speed;
+                rotPow = 0.3 * speed;
+                realTimeOut = timeoutSeconds * 0.1;
             }
-            moveUsingEncoder(newLeftTarget, newRightTarget, rotPow, timeoutSeconds);
+            moveUsingEncoder(newLeftTarget, newRightTarget, rotPow, realTimeOut);
         }
 
     }

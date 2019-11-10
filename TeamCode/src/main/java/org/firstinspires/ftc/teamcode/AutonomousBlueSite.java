@@ -98,10 +98,10 @@ public class AutonomousBlueSite extends LinearOpMode {
         driveUsingEncoder(0.4, 37.5,37.5, 5);
         turnRightUsingEncoder(1, 1, 1);
         spoolDown(1, 0.05);
-        driveUsingEncoder(0.3, 30, 30, 3);
+        driveUsingEncoder(0.3, 27, 27, 3);
 
         // Step 3: Go around the building site.
-        driveUsingEncoder(0.6, -60, -60, 5);
+        driveUsingEncoder(0.6, -55, -55, 5);
         turnRightUsingEncoder(0.8,90, 1);
         driveUsingEncoder(0.6, 35, 35, 5);
         turnRightUsingEncoder(0.8, 165, 1);
@@ -177,7 +177,7 @@ public class AutonomousBlueSite extends LinearOpMode {
         int newLeftTarget;
         int newRightTarget;
         double rotPow;
-        double RealTimeOut;
+        double realTimeOut;
 
         for (int idx = 0; idx < 10; idx++) {
             // Determine how much our heading is off.
@@ -200,24 +200,24 @@ public class AutonomousBlueSite extends LinearOpMode {
             // Power will also be a function of turnRemaining. Big turnRemaining = fast, small turnRemaining = slow
             if (Math.abs(turnRemaining) > 50) {
                 rotPow = 0.8 * speed;
-                RealTimeOut = timeoutSeconds * 1;
+                realTimeOut = timeoutSeconds * 1;
             } else if (Math.abs(turnRemaining) > 40) {
                 rotPow = 0.6 * speed;
-                RealTimeOut = timeoutSeconds * 0.8;
+                realTimeOut = timeoutSeconds * 0.8;
             } else if (Math.abs(turnRemaining) > 30) {
                 rotPow = 0.4 * speed;
-                RealTimeOut = timeoutSeconds * 0.6;
+                realTimeOut = timeoutSeconds * 0.6;
             } else if (Math.abs(turnRemaining) > 20) {
                 rotPow = 0.3 * speed;
-                RealTimeOut = timeoutSeconds * 0.4;
+                realTimeOut = timeoutSeconds * 0.4;
             } else if (Math.abs(turnRemaining) > 10) {
                 rotPow = 0.3 * speed;
-                RealTimeOut = timeoutSeconds *0.2;
+                realTimeOut = timeoutSeconds *0.2;
             } else {
                 rotPow = 0.3 * speed;
-                RealTimeOut = timeoutSeconds * 0.1;
+                realTimeOut = timeoutSeconds * 0.1;
             }
-            moveUsingEncoder(newLeftTarget, newRightTarget, rotPow, RealTimeOut);
+            moveUsingEncoder(newLeftTarget, newRightTarget, rotPow, realTimeOut);
         }
 
     }
@@ -233,7 +233,7 @@ public class AutonomousBlueSite extends LinearOpMode {
         int newLeftTarget;
         int newRightTarget;
         double rotPow;
-        double RealTimeOut;
+        double realTimeOut;
 
         for (int idx = 0; idx < 10; idx++) {
             // Determine how much our heading is off.
@@ -257,24 +257,24 @@ public class AutonomousBlueSite extends LinearOpMode {
 
             if (Math.abs(turnRemaining) > 50) {
                 rotPow = 0.8 * speed;
-                RealTimeOut = timeoutSeconds * 1;
+                realTimeOut = timeoutSeconds * 1;
             } else if (Math.abs(turnRemaining) > 40) {
                 rotPow = 0.6 * speed;
-                RealTimeOut = timeoutSeconds * 0.8;
+                realTimeOut = timeoutSeconds * 0.8;
             } else if (Math.abs(turnRemaining) > 30) {
                 rotPow = 0.4 * speed;
-                RealTimeOut = timeoutSeconds * 0.6;
+                realTimeOut = timeoutSeconds * 0.6;
             } else if (Math.abs(turnRemaining) > 20) {
                 rotPow = 0.3 * speed;
-                RealTimeOut = timeoutSeconds * 0.3;
+                realTimeOut = timeoutSeconds * 0.3;
             } else if (Math.abs(turnRemaining) > 10) {
                 rotPow = 0.3 * speed;
-                RealTimeOut = timeoutSeconds * 0.3;
+                realTimeOut = timeoutSeconds * 0.3;
             } else {
                 rotPow = 0.3 * speed;
-                RealTimeOut = timeoutSeconds * 0.1;
+                realTimeOut = timeoutSeconds * 0.1;
             }
-            moveUsingEncoder(newLeftTarget, newRightTarget, rotPow, RealTimeOut);
+            moveUsingEncoder(newLeftTarget, newRightTarget, rotPow, realTimeOut);
         }
 
     }
