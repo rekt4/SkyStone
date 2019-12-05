@@ -5,6 +5,7 @@ import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -15,20 +16,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 @Autonomous(name = "AutonomousRedSite", group = "boundless")
 public class AutonomousRedSite extends LinearOpMode {
-    // Initiate all the motors. We have 5 motors
-
-    // The spool controls the up/down motion
-    private DcMotor spool = null;
-
-    // The frontLeft and frontRight controls the drive train
     private DcMotor frontLeft = null;
     private DcMotor frontRight = null;
-
-    // The leftRight controls the horizontal motion
-    private DcMotor leftRight = null;
-
-    // The frontBack controls the front-back claw
-    private DcMotor frontBack = null;
+    private DcMotor backLeft = null;
+    private DcMotor backRight = null;
+    private DcMotor clawLeft = null;
+    private DcMotor clawRight = null;
+    private DcMotor spool = null;
+    private Servo rear = null;
 
     BNO055IMU imu;
     Orientation angles;
@@ -66,17 +61,30 @@ public class AutonomousRedSite extends LinearOpMode {
         frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
         frontRight = hardwareMap.get(DcMotor.class, "frontRight");
         spool = hardwareMap.get(DcMotor.class, "spool");
-        leftRight = hardwareMap.get(DcMotor.class, "leftRight");
-        frontBack = hardwareMap.get(DcMotor.class, "frontBack");
+        backLeft = hardwareMap.get(DcMotor.class, "backLeft");
+        backRight = hardwareMap.get(DcMotor.class, "backRight");
+        clawLeft = hardwareMap.get(DcMotor.class, "clawLeft");
+        clawRight = hardwareMap.get(DcMotor.class, "clawRight");
+        rear = hardwareMap.get(Servo.class, "rear");
 
         // set left motor to run to target encoder position and stop with brakes on.
         frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         // set right motor to reverse and run to target encoder position and stop with brakes on
         frontRight.setDirection(DcMotor.Direction.REVERSE);
         frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        backRight.setDirection(DcMotor.Direction.REVERSE);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        // set spool to stop with brakes on
+        spool.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // This always updates telemetry
         telemetry.addData("Status", "Boundless Robotics Ready to Launch");
@@ -84,36 +92,14 @@ public class AutonomousRedSite extends LinearOpMode {
 
         waitForStart();
 
-        // Step 1: Get the building site close to the wall.
-        spoolUp(1, 0.5);
-        driveUsingEncoder(0.3, -39,-39, 5);
-        spoolDown(1,0.1);
-        try { Thread.sleep(500); } catch(Exception ex) {}
-        driveUsingEncoder(0.4, 32,32, 5);
+        // Step 1: Spool up and drive forward by 40 inches
+        spoolUp(0.5,1);
+        driveUsingEncoder(0.5, -40, -40, 10);
+        try { Thread.sleep(100); } catch(Exception ex) {}
 
-       //Step 2: Turn left and align next to the building site.
-        spoolUp(1, 0.5);
-        driveUsingEncoder(0.3, 4.5, 4.5, 5);
-        turnRightUsingEncoder(1, 90, 1);
-        driveUsingEncoder(0.4, 46,46, 5);
-        turnLeftUsingEncoder(1, 1, 1);
-        spoolDown(1,0.05);
-        driveUsingEncoder(0.3, 20, 20, 3);
-
-        // Step 3: Go around the building site.
-        driveUsingEncoder(0.6, -60, -60, 5);
-        turnLeftUsingEncoder(0.8,90, 1);
-        driveUsingEncoder(0.6, 35, 35, 5);
-        turnLeftUsingEncoder(0.8, 165, 1);
-
-        // Step 4: Push the building site.
-        driveUsingEncoder(0.3, -42, -42, 5);
-
-        // Step 5: Back up and turn right + go forward to bridge.
-        driveUsingEncoder(0.6, 4, 4, 5);
-        turnRightUsingEncoder(0.8, -90, 1);
-        driveUsingEncoder(0.8, 40, 40, 5);
-        driveUsingEncoder(0.6, -65, -65, 5);
+        // Step 2: Spool down and move the platform back
+        spoolDown(0.5, 1);
+        driveUsingEncoder(0.5, 40, 40, 10);
 
     }
 
@@ -135,34 +121,71 @@ public class AutonomousRedSite extends LinearOpMode {
         //new target calculated
         frontLeft.setTargetPosition(newLeftTarget);
         frontRight.setTargetPosition(newRightTarget);
+        backLeft.setTargetPosition(newLeftTarget);
+        backRight.setTargetPosition(newRightTarget);
 
         // Turn On RUN_TO_POSITION
         frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // reset the timeout time and start motion.
         runtime.reset();
         frontLeft.setPower(Math.abs(speed));
+        backLeft.setPower(Math.abs(speed)/3);
+
         frontRight.setPower(Math.abs(speed));
+        backRight.setPower(Math.abs(speed)/3);
 
         while (opModeIsActive() &&
                 (runtime.seconds() < timeoutSeconds) &&
-                (frontLeft.isBusy() && frontRight.isBusy())) {
+                (frontLeft.isBusy() && frontRight.isBusy() && backLeft.isBusy() && backRight.isBusy())) {
 
             // Display it for the driver.
             telemetry.addData("Path1", "Running to %7d :%7d", newLeftTarget, newRightTarget);
             telemetry.addData("Path2", "Running at %7d :%7d",
                     frontLeft.getCurrentPosition(),
-                    frontRight.getCurrentPosition());
+                    frontRight.getCurrentPosition(),
+                    backLeft.getCurrentPosition(),
+                    backRight.getCurrentPosition());
             telemetry.update();
         }
         // Stop all motion;
         frontLeft.setPower(0);
         frontRight.setPower(0);
+        backLeft.setPower(0);
+        backRight.setPower(0);
 
         // Turn off RUN_TO_POSITION
         frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    private double getPowerForRotation(double turnRemaining, double speed) {
+        if (Math.abs(turnRemaining) > 50) {
+            return 0.8 * speed;
+        } else if (Math.abs(turnRemaining) > 40) {
+            return 0.6 * speed;
+        } else if (Math.abs(turnRemaining) > 30) {
+            return 0.4 * speed;
+        } else {
+            return 0.3 * speed;
+        }
+    }
+
+    private double getTimeoutForRotation(double turnRemaining, double timeoutSeconds) {
+        if (Math.abs(turnRemaining) > 50) {
+            return 0.8 * timeoutSeconds;
+        } else if (Math.abs(turnRemaining) > 40) {
+            return 0.6 * timeoutSeconds;
+        } else if (Math.abs(turnRemaining) > 30) {
+            return 0.4 * timeoutSeconds;
+        } else {
+            return 0.3 * timeoutSeconds;
+        }
     }
 
     /**
@@ -171,112 +194,46 @@ public class AutonomousRedSite extends LinearOpMode {
      * @param targetAngle
      * @param timeoutSeconds
      */
-    public void turnLeftUsingEncoder(double speed, double targetAngle, double timeoutSeconds) {
+    public void turnUsingEncoder(double speed, double targetAngle, boolean isTurnLeft, double timeoutSeconds) {
         double turnRemaining;
         int newLeftTarget;
         int newRightTarget;
-        double rotPow;
-        double RealTimeOut;
+        final double MAGIC_NUMBER_FOR_ROTATIONS = 1800;    // eg: TETRIX Motor Encoder
 
         for (int idx = 0; idx < 10; idx++) {
             // Determine how much our heading is off.
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            turnRemaining = targetAngle - angles.firstAngle;
+
+            // Determine new target position.
+            if (isTurnLeft) {
+                turnRemaining = targetAngle - angles.firstAngle;
+                newLeftTarget = frontLeft.getCurrentPosition() + (int) ((turnRemaining / 360) * MAGIC_NUMBER_FOR_ROTATIONS);
+                newRightTarget = frontRight.getCurrentPosition() - (int) ((turnRemaining / 360) * MAGIC_NUMBER_FOR_ROTATIONS);
+            } else {
+                turnRemaining = targetAngle + angles.firstAngle;
+                newLeftTarget = frontLeft.getCurrentPosition() - (int) ((turnRemaining / 360) * MAGIC_NUMBER_FOR_ROTATIONS);
+                newRightTarget = frontRight.getCurrentPosition() + (int) ((turnRemaining / 360) * MAGIC_NUMBER_FOR_ROTATIONS);
+            }
 
             // Get out of loop early if there is no turnRemaining.
             if (turnRemaining <= 2) {
                 break;
             }
 
-            telemetry.addData("Turn Remaining", "" + turnRemaining);
+            telemetry.addData("Remaining Angle", "" + turnRemaining);
+            telemetry.addData("Current Angle", "" + angles.firstAngle);
             telemetry.update();
-
-            // Determine new target position.
-            newLeftTarget = frontLeft.getCurrentPosition() - (int) ((turnRemaining / 360) * 2335);
-            newRightTarget = frontRight.getCurrentPosition() + (int) ((turnRemaining / 360) * 2335);
+            try { Thread.sleep(100); } catch(Exception ex) {}
 
 
             // Power will also be a function of turnRemaining. Big turnRemaining = fast, small turnRemaining = slow
-            if (Math.abs(turnRemaining) > 50) {
-                rotPow = 0.8 * speed;
-                RealTimeOut = timeoutSeconds * 1;
-            } else if (Math.abs(turnRemaining) > 40) {
-                rotPow = 0.6 * speed;
-                RealTimeOut = timeoutSeconds * 0.8;
-            } else if (Math.abs(turnRemaining) > 30) {
-                rotPow = 0.4 * speed;
-                RealTimeOut = timeoutSeconds * 0.6;
-            } else if (Math.abs(turnRemaining) > 20) {
-                rotPow = 0.3 * speed;
-                RealTimeOut = timeoutSeconds * 0.4;
-            } else if (Math.abs(turnRemaining) > 10) {
-                rotPow = 0.3 * speed;
-                RealTimeOut = timeoutSeconds *0.2;
-            } else {
-                rotPow = 0.3 * speed;
-                RealTimeOut = timeoutSeconds * 0.1;
-            }
-            moveUsingEncoder(newLeftTarget, newRightTarget, rotPow, RealTimeOut);
+            moveUsingEncoder(newLeftTarget,
+                    newRightTarget,
+                    getPowerForRotation(turnRemaining, speed),
+                    getTimeoutForRotation(turnRemaining, timeoutSeconds));
         }
-
     }
 
-    /**
-     *
-     * @param speed
-     * @param targetAngle
-     * @param timeoutSeconds
-     */
-    public void turnRightUsingEncoder(double speed, double targetAngle, double timeoutSeconds) {
-        double turnRemaining;
-        int newLeftTarget;
-        int newRightTarget;
-        double rotPow;
-        double RealTimeOut;
-
-        for (int idx = 0; idx < 10; idx++) {
-            // Determine how much our heading is off.
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            turnRemaining = targetAngle + angles.firstAngle;
-
-            // Get out of loop early if there is no turnRemaining.
-            if (turnRemaining <= 2) {
-                break;
-            }
-
-            telemetry.addData("Turn Remaining", "" + turnRemaining);
-            telemetry.update();
-
-            // Determine new target position.
-            newLeftTarget = frontLeft.getCurrentPosition() + (int) ((turnRemaining / 360) * 2335);
-            newRightTarget = frontRight.getCurrentPosition() - (int) ((turnRemaining / 360) * 2335);
-
-
-            // Power will also be a function of turnRemaining. Big turnRemaining = fast, small turnRemaining = slow
-
-            if (Math.abs(turnRemaining) > 50) {
-                rotPow = 0.8 * speed;
-                RealTimeOut = timeoutSeconds * 1;
-            } else if (Math.abs(turnRemaining) > 40) {
-                rotPow = 0.6 * speed;
-                RealTimeOut = timeoutSeconds * 0.8;
-            } else if (Math.abs(turnRemaining) > 30) {
-                rotPow = 0.4 * speed;
-                RealTimeOut = timeoutSeconds * 0.6;
-            } else if (Math.abs(turnRemaining) > 20) {
-                rotPow = 0.3 * speed;
-                RealTimeOut = timeoutSeconds * 0.3;
-            } else if (Math.abs(turnRemaining) > 10) {
-                rotPow = 0.3 * speed;
-                RealTimeOut = timeoutSeconds * 0.3;
-            } else {
-                rotPow = 0.3 * speed;
-                RealTimeOut = timeoutSeconds * 0.1;
-            }
-            moveUsingEncoder(newLeftTarget, newRightTarget, rotPow, RealTimeOut);
-        }
-
-    }
 
     public void driveUsingEncoder(double speed, double leftInches, double rightInches, double timeoutSeconds) {
 
@@ -311,19 +268,5 @@ public class AutonomousRedSite extends LinearOpMode {
         spool.setPower(-1 * speed);
         try { Thread.sleep(timeoutInMillis); } catch(Exception ex) {}
         spool.setPower(0);
-    }
-
-    public void openClaw(double speed, double timeoutSeconds) {
-        frontBack.setPower(speed);
-        long timeoutInMillis = (long) (timeoutSeconds * 1000);
-        try { Thread.sleep(timeoutInMillis); } catch(Exception ex) {}
-        frontBack.setPower(0);
-    }
-
-    public void closeClaw(double speed, double timeoutSeconds) {
-        frontBack.setPower(-1 * speed);
-        long timeoutInMillis = (long) (timeoutSeconds * 1000);
-        try { Thread.sleep(timeoutInMillis); } catch(Exception ex) {}
-        frontBack.setPower(0);
     }
 }
