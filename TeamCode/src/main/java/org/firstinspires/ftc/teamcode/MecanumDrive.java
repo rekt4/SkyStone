@@ -23,6 +23,7 @@ public class MecanumDrive extends LinearOpMode {
     private DcMotor clawLeft = null;
     private DcMotor clawRight = null;
     private DcMotor spool = null;
+    private Servo rear = null;
 
 
     public void runOpMode(){
@@ -35,6 +36,7 @@ public class MecanumDrive extends LinearOpMode {
         backRight = hardwareMap.get(DcMotor.class, "backRight");
         clawLeft = hardwareMap.get(DcMotor.class, "clawLeft");
         clawRight = hardwareMap.get(DcMotor.class, "clawRight");
+        rear = hardwareMap.get(Servo.class, "rear");
 
         // This always updates telemetry
         telemetry.addData("Status", "Initialized");
@@ -71,18 +73,44 @@ public class MecanumDrive extends LinearOpMode {
                clawRight.setPower(0);
            }
 
+            if (this.gamepad1.left_bumper) {
+                frontLeft.setPower(1);
+                backLeft.setPower(-1);
+                frontRight.setPower(-1);
+                backRight.setPower(1);
+            } else if (this.gamepad1.right_bumper) {
+                frontLeft.setPower(-1);
+                backLeft.setPower(1);
+                frontRight.setPower(1);
+                backRight.setPower(-1);
+            } else {
+                frontLeft.setPower(0);
+                backLeft.setPower(0);
+                frontRight.setPower(0);
+                backRight.setPower(0);
+            }
+
 
             drive = this.gamepad1.left_stick_y;
-            strafe = this.gamepad1.left_stick_x;
-            rotate = this.gamepad1.right_stick_x;
+            rotate = -1*this.gamepad1.right_stick_x;
 
-            frontLeft.setPower(drive + strafe + rotate);
-            backLeft.setPower(drive - strafe + rotate);
-            frontRight.setPower(drive - strafe - rotate);
-            backRight.setPower(drive + strafe - rotate);
+            frontLeft.setPower(drive + rotate);
+            backLeft.setPower(drive + rotate);
+            frontRight.setPower(drive - rotate);
+            backRight.setPower(drive - rotate);
+
+            if (gamepad2.y) {
+                rear.setPosition(1);
+            } else if (gamepad2.x) {
+                rear.setPosition(0.4);
+            }
+//            else {
+//                rear.setPosition(1);
+//            }
 
             // Code below helps for debugging
             telemetry.addData("Status", "Running");
+            telemetry.addData("Servo Position", rear.getPosition());
             telemetry.update();
         }
     }
@@ -95,5 +123,4 @@ public class MecanumDrive extends LinearOpMode {
         telemetry.addData("Motor Power - Right", frontRight.getPower());
 
     }
-
 }
