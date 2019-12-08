@@ -24,6 +24,8 @@ public class MecanumDrive extends LinearOpMode {
     private DcMotor clawRight = null;
     private DcMotor spool = null;
     private Servo rear = null;
+    private Servo capstone = null;
+
 
 
     public void runOpMode(){
@@ -37,6 +39,7 @@ public class MecanumDrive extends LinearOpMode {
         clawLeft = hardwareMap.get(DcMotor.class, "clawLeft");
         clawRight = hardwareMap.get(DcMotor.class, "clawRight");
         rear = hardwareMap.get(Servo.class, "rear");
+        capstone = hardwareMap.get(Servo.class, "capstone");
 
         // This always updates telemetry
         telemetry.addData("Status", "Initialized");
@@ -103,10 +106,17 @@ public class MecanumDrive extends LinearOpMode {
                 rear.setPosition(1);
             } else if (gamepad2.x) {
                 rear.setPosition(0.4);
+            } else if (gamepad2.right_trigger == 1) {
+                rear.setPosition(0.8);
             }
-//            else {
-//                rear.setPosition(1);
-//            }
+
+            if (gamepad2.left_trigger == 1) {
+                capstone.setPosition(1);
+            } else if (gamepad2.left_bumper) {
+                capstone.setPosition(0);
+            } else if (gamepad2.dpad_left || gamepad2.dpad_right || gamepad2.dpad_up || gamepad2.dpad_down) {
+                capstone.setPosition(0.3);
+            }
 
             // Code below helps for debugging
             telemetry.addData("Status", "Running");

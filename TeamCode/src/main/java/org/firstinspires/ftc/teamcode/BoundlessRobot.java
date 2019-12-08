@@ -95,6 +95,13 @@ public class BoundlessRobot {
         try { Thread.sleep(1000); } catch(Exception ex) {}
     }
 
+    public void printCurrentPosition(Telemetry telemetry) {
+        telemetry.addData("front", "Running to %7d :%7d", frontLeft.getCurrentPosition(), frontRight.getCurrentPosition());
+        telemetry.addData("back", "Running at %7d :%7d", backLeft.getCurrentPosition(), backRight.getCurrentPosition());
+        telemetry.update();
+        try { Thread.sleep(1000); } catch(Exception ex) {}
+    }
+
     /**
      * Utility method to move the robot using encoder values
      * @param newLeftTarget -- This is the Left wheel's target position.
@@ -164,6 +171,11 @@ public class BoundlessRobot {
                                double speed,
                                double timeoutSeconds) {
         try {
+            frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
             //new target calculated
             frontLeft.setTargetPosition(frontLeftTarget);
             frontRight.setTargetPosition(frontRightTarget);
@@ -200,6 +212,11 @@ public class BoundlessRobot {
             frontRight.setPower(0);
             backLeft.setPower(0);
             backRight.setPower(0);
+
+            frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
             // Turn off RUN_TO_POSITION
             frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -309,5 +326,57 @@ public class BoundlessRobot {
         spool.setPower(-1 * speed);
         try { Thread.sleep(timeoutInMillis); } catch(Exception ex) {}
         spool.setPower(0);
+    }
+
+    public void strafeLeft(Telemetry telemetry, Callable<Boolean> opMode, double speed, double leftInches, double timeoutSeconds) {
+
+        final double COUNTS_PER_MOTOR_REV = 1440;    // eg: TETRIX Motor Encoder
+        final double DRIVE_GEAR_REDUCTION = 0.33;     // This is < 1.0 if geared UP
+        final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
+        final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
+
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        // Determine new target position, and pass to motor controller
+        int frontLeftTarget = frontLeft.getCurrentPosition() + (int) (leftInches * COUNTS_PER_INCH);
+        int frontRightTarget = frontRight.getCurrentPosition() - (int) (leftInches * COUNTS_PER_INCH);
+        int backLeftTarget = frontLeft.getCurrentPosition() - (int) (leftInches * COUNTS_PER_INCH);
+        int backRightTarget = frontRight.getCurrentPosition() + (int) (leftInches * COUNTS_PER_INCH);
+
+        fourWheelDrive(telemetry, opMode, frontLeftTarget, frontRightTarget, backLeftTarget, backRightTarget, speed, timeoutSeconds);
+
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+
+    public void strafeRight(Telemetry telemetry, Callable<Boolean> opMode, double speed, double rightInches, double timeoutSeconds) {
+
+        final double COUNTS_PER_MOTOR_REV = 1440;    // eg: TETRIX Motor Encoder
+        final double DRIVE_GEAR_REDUCTION = 0.33;     // This is < 1.0 if geared UP
+        final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
+        final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
+
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        // Determine new target position, and pass to motor controller
+        int frontLeftTarget = frontLeft.getCurrentPosition() - (int) (rightInches * COUNTS_PER_INCH);
+        int frontRightTarget = frontRight.getCurrentPosition() + (int) (rightInches * COUNTS_PER_INCH);
+        int backLeftTarget = frontLeft.getCurrentPosition() + (int) (rightInches * COUNTS_PER_INCH);
+        int backRightTarget = frontRight.getCurrentPosition() - (int) (rightInches * COUNTS_PER_INCH);
+
+        fourWheelDrive(telemetry, opMode, frontLeftTarget, frontRightTarget, backLeftTarget, backRightTarget, speed, timeoutSeconds);
+
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 }
