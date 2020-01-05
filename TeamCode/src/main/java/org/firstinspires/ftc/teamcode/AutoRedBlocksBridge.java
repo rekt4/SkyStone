@@ -39,10 +39,13 @@ public class AutoRedBlocksBridge extends LinearOpMode {
         robot.turnUsingEncoder(telemetry, opMode, 0.7, 90, false, 3);
 
         // Step 5: Drive beyond the bridge
-        robot.driveUsingEncoder(telemetry, opMode,0.5, 40, 40, 10);
+        robot.driveUsingEncoder(telemetry, opMode,0.5, 50, 50, 10);
 
         // Step 6: Lift the rear servo
         robot.rear.setPosition(1);
         try{ Thread.sleep(3000); } catch( Exception ex ) {}
+
+        // Step 7: Drive under the bridge
+        robot.driveUsingEncoder(telemetry, opMode,0.5, -10, -10, 10);
     }
 }

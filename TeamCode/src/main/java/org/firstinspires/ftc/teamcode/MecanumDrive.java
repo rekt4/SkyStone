@@ -97,10 +97,10 @@ public class MecanumDrive extends LinearOpMode {
             drive = this.gamepad1.left_stick_y;
             rotate = -1*this.gamepad1.right_stick_x;
 
-            frontLeft.setPower(drive + rotate);
-            backLeft.setPower(drive + rotate);
-            frontRight.setPower(drive - rotate);
-            backRight.setPower(drive - rotate);
+            frontLeft.setPower(0.8*(drive + rotate));
+            backLeft.setPower(0.8*(drive + rotate));
+            frontRight.setPower(0.8*(drive - rotate));
+            backRight.setPower(0.8*(drive - rotate));
 
             if (gamepad2.y) {
                 rear.setPosition(1);
