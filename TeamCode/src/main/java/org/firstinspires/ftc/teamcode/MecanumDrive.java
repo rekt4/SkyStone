@@ -26,6 +26,14 @@ public class MecanumDrive extends LinearOpMode {
     private Servo rear = null;
     private Servo capstone = null;
 
+    private double drive_scale = 1;
+    private double DRIVE_POWER_HIGH_SCALE = .9;
+    private double DRIVE_POWER_LOW_SCALE = 0.5;
+
+    private boolean intake_is_spinning = false;
+    private boolean is_strafing_left = false;
+    private boolean is_strafing_right = false;
+
 
 
     public void runOpMode(){
@@ -53,7 +61,7 @@ public class MecanumDrive extends LinearOpMode {
         double strafe = 0;
         double rotate = 0;
         double spoolPowerRequest = 0;
-        double leftClawPowerRequest = 0;
+        double leftClawPowerRequest =  0;
         double rightClawPowerRequest = 0;
         frontRight.setDirection(DcMotor.Direction.REVERSE);
         backRight.setDirection(DcMotor.Direction.REVERSE);
@@ -64,44 +72,62 @@ public class MecanumDrive extends LinearOpMode {
             spoolPowerRequest = -this.gamepad2.left_stick_y;
             spool.setPower(spoolPowerRequest);
 
-            //make the left and right wheels of the claw move based on which button is pressed
+            //INTAKE: make the left and right wheels of the claw move based on which button is pressed
            if (this.gamepad2.a) {
                clawLeft.setPower(0.7);
                clawRight.setPower(0.7);
+               intake_is_spinning = true;
             } else if (this.gamepad2.b){
                clawLeft.setPower(-0.3);
                clawRight.setPower(-0.3);
+               intake_is_spinning = true;
             } else {
                clawLeft.setPower(0);
                clawRight.setPower(0);
+               intake_is_spinning = false;
            }
 
+           // STRAFING...
             if (this.gamepad1.left_bumper) {
-                frontLeft.setPower(1);
-                backLeft.setPower(-1);
-                frontRight.setPower(-1);
-                backRight.setPower(1);
+                frontLeft.setPower(.6);
+                backLeft.setPower(-.5);
+                frontRight.setPower(-.6);
+                backRight.setPower(.5);
+                is_strafing_left = true;
+                is_strafing_right = false;
             } else if (this.gamepad1.right_bumper) {
-                frontLeft.setPower(-1);
-                backLeft.setPower(1);
-                frontRight.setPower(1);
-                backRight.setPower(-1);
+                frontLeft.setPower(-.6);
+                backLeft.setPower(.5);
+                frontRight.setPower(.6);
+                backRight.setPower(-.5);
+                is_strafing_left = false;
+                is_strafing_right = true;
             } else {
                 frontLeft.setPower(0);
                 backLeft.setPower(0);
                 frontRight.setPower(0);
                 backRight.setPower(0);
+                is_strafing_left = false;
+                is_strafing_right = false;
             }
 
-
+            // DRIVING and ROTATION...
+            // trying to reduce voltage drop
+            // if intake is spinning, then reduce maximum drive power
             drive = this.gamepad1.left_stick_y;
             rotate = -1*this.gamepad1.right_stick_x;
 
-            frontLeft.setPower(0.8*(drive + rotate));
-            backLeft.setPower(0.8*(drive + rotate));
-            frontRight.setPower(0.8*(drive - rotate));
-            backRight.setPower(0.8*(drive - rotate));
+            if (intake_is_spinning){
+                drive_scale = DRIVE_POWER_LOW_SCALE;
+            } else {
+                drive_scale = DRIVE_POWER_HIGH_SCALE;
+            }
+            frontLeft.setPower(drive_scale*(drive + rotate));
+            backLeft.setPower(drive_scale*(drive + rotate));
+            frontRight.setPower(drive_scale*(drive - rotate));
+            backRight.setPower(drive_scale*(drive - rotate));
 
+            // rear grabber...
             if (gamepad2.y) {
                 rear.setPosition(1);
             } else if (gamepad2.x) {
@@ -110,6 +136,7 @@ public class MecanumDrive extends LinearOpMode {
                 rear.setPosition(0.8);
             }
 
+            // capstone stick...
             if (gamepad2.left_trigger == 1) {
                 capstone.setPosition(1);
             } else if (gamepad2.left_bumper) {
@@ -120,7 +147,11 @@ public class MecanumDrive extends LinearOpMode {
 
             // Code below helps for debugging
             telemetry.addData("Status", "Running");
-            telemetry.addData("Servo Position", rear.getPosition());
+            //telemetry.addData("rear grabber pos", rear.getPosition());
+            //telemetry.addData("capstone pos", capstone.getPosition());
+            telemetry.addData("intake_is_spinning", intake_is_spinning);
+            telemetry.addData("is_strafing_left", is_strafing_left);
+            telemetry.addData("is_strafing_right", is_strafing_right);
             telemetry.update();
         }
     }
