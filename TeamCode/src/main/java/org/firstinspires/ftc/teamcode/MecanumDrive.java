@@ -27,8 +27,8 @@ public class MecanumDrive extends LinearOpMode {
     private Servo capstone = null;
 
     private double drive_scale = 1;
-    private double DRIVE_POWER_HIGH_SCALE = .9;
-    private double DRIVE_POWER_LOW_SCALE = 0.5;
+    private double DRIVE_POWER_HIGH_SCALE = 0.95;
+    private double DRIVE_POWER_LOW_SCALE = 0.6;
 
     private boolean intake_is_spinning = false;
     private boolean is_strafing_left = false;
@@ -96,10 +96,10 @@ public class MecanumDrive extends LinearOpMode {
                 is_strafing_left = true;
                 is_strafing_right = false;
             } else if (this.gamepad1.right_bumper) {
-                frontLeft.setPower(-.6);
+                frontLeft.setPower(-.55);
                 backLeft.setPower(.5);
-                frontRight.setPower(.6);
-                backRight.setPower(-.5);
+                frontRight.setPower(.43);
+                backRight.setPower(-.31);
                 is_strafing_left = false;
                 is_strafing_right = true;
             } else {
@@ -132,7 +132,7 @@ public class MecanumDrive extends LinearOpMode {
                 rear.setPosition(1);
             } else if (gamepad2.x) {
                 rear.setPosition(0.4);
-            } else if (gamepad2.right_trigger == 1) {
+            } else if (gamepad2.right_bumper) {
                 rear.setPosition(0.8);
             }
 
@@ -144,7 +144,6 @@ public class MecanumDrive extends LinearOpMode {
             } else if (gamepad2.dpad_left || gamepad2.dpad_right || gamepad2.dpad_up || gamepad2.dpad_down) {
                 capstone.setPosition(0.3);
             }
-
             // Code below helps for debugging
             telemetry.addData("Status", "Running");
             //telemetry.addData("rear grabber pos", rear.getPosition());
