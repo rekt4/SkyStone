@@ -44,6 +44,7 @@ public class AutonomousRedSiteWall extends LinearOpMode {
         robot.strafeLeft(telemetry, opMode, 0.3, 40, 10);
 
         robot.spoolDown(0.5, 0.7);
+        robot.driveUsingEncoder(telemetry,opMode,0.4,6,6, 10);
         robot.strafeLeft(telemetry, opMode, 0.3, 10, 10);
 
 
